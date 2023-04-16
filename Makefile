@@ -11,7 +11,7 @@ run:
 	cargo run
 
 install:
-	sudo cp target/release/startw /usr/local/bin
+	cp target/release/startw /usr/local/bin
 
 clean:
 	cargo clean
