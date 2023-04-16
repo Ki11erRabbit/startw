@@ -2,22 +2,32 @@ use std::env;
 use std::path::Path;
 
 use std::process::Command;
-use std::os::unix::process::CommandExt;
 
 
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    if Path::new("~/.winitrc").exists() {
-        Command::new("/bin/sh")
-            .args(&args[1..])
-            .exec();
+    let args = if args.len() > 1 {
+        &args[1..]
     }
     else {
-        Command::new(&args[1])
-            .args(&args[2..])
-            .exec();
+        &args[1..]
+    };
+    let winitrc = &format!("{}/.winitrc",env::var("HOME").unwrap());
+    let mut command = if Path::new(&winitrc).exists() {
+        //println!("Running ~/.winitrc");
+        Command::new("sh")
+            .stdin(std::fs::File::open(&winitrc).unwrap())
+            .args(&args[..])
+            .spawn().expect("Failed to execute ~/.winitrc")
     }
+    else {
+        Command::new(&args[0])
+            .args(&args[1..])
+            .spawn().expect("Failed to execute command")
+    };
+
+    command.wait().expect("Failed to wait on child");
 
 }
 
